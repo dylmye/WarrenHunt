@@ -7,6 +7,8 @@
 This program is the basis for the 'Rabbits & Foxes' 2017 AQA Computer Science A Level program.
 
 The documentation style is based on the Google documentation style, available here: https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html
+
+Version 3.0.2
 """
 
 import enum
@@ -547,6 +549,21 @@ class Animal:
   _ID = 1
 
   def __init__(self, AvgLifespan, AvgProbabilityOfDeathOtherCauses, Variability):
+    """
+    Animal is a generic class with properties shared by all animals.
+
+    Args:
+        AvgLifespan (int): The average lifespan rate, set by us humans
+        AvgProbabilityOfDeathOtherCauses (float): The average probability of death from other causes (non-fox)
+        Variability (int): Something to do with chance/randomness in Warrens
+
+    Attributes:
+        _NaturalLifespan (int): How long Animal lives
+        _ProbabilityOfDeathOtherCauses (int): Actual probability of death from other causes (non-fox)
+        _IsAlive (bool): set to false when deded
+        _ID (int): set to 1 by default, see ln 547, then with every new Animal it increases by 1, see ln 570
+        _Age (int): starts at 0
+    """
     self._NaturalLifespan = int(AvgLifespan * self._CalculateRandomValue(100, Variability) / 100)
     self._ProbabilityOfDeathOtherCauses = AvgProbabilityOfDeathOtherCauses * self._CalculateRandomValue(100, Variability) / 100
     self._IsAlive = True
@@ -555,20 +572,38 @@ class Animal:
     Animal._ID += 1
 
   def CalculateNewAge(self):
+    """
+    Increases age of animal, 'kills' animal if now older than self._NaturalLifespan
+    """
     self._Age += 1
     if self._Age >= self._NaturalLifespan:
       self._IsAlive = False
 
   def CheckIfDead(self): 
+    """
+    Getter for self._IsAlive
+
+    Returns:
+      bool: True if alive, otherwise False
+    """
     return not self._IsAlive
 
   def Inspect(self):
+    """
+    Prints animal's ID, Age, Lifespan, and probability of death of other causes
+    """
     print("  ID", self._ID, "", end = "")
     print("Age", self._Age, "", end = "")
     print("LS", self._NaturalLifespan, "", end = "")
     print("Pr dth", round(self._ProbabilityOfDeathOtherCauses, 2), "", end = "")
 
   def CheckIfKilledByOtherFactor(self):
+    """
+    Kills animals based on chance, using self._ProbabilityOfDeathOtherCauses
+
+    Returns:
+      bool: True if killed, otherwise False
+    """
     if random.randint(0, 100) < self._ProbabilityOfDeathOtherCauses * 100:
       self._IsAlive = False
       return True
@@ -576,10 +611,32 @@ class Animal:
       return False
 
   def _CalculateRandomValue(self, BaseValue, Variability):
+    """
+    Calculates a pseudo-random value for Variability
+
+    Args:
+      BaseValue (int): ???
+      Variability (int): Something to do with chance/randomness in Warrens
+    
+    Returns:
+      int: random value based on BaseValue and Variability
+    """
     return BaseValue - (BaseValue * Variability / 100) + (BaseValue * random.randint(0, Variability * 2) / 100)
 
 class Fox(Animal):
   def __init__(self, Variability):
+    """
+    Fox is an Animal with some funky extras
+
+    Args:
+        Variability (int): Something to do with chance/randomness in Warrens
+
+    Attributes:
+        __DEFAULT_LIFE_SPAN (int): Constant that sets lifespan
+        __DEFAULT_PROBABILITY_DEATH_OTHER_CAUSES (float): Constant for Animal's probability of death by other causes (non-fox)
+        __FoodUnitsNeeded (int): Random number defining how many food units are required to stay alive
+        __FoodUnitsConsumedThisPeriod (int): Counter for food units consumed
+    """
     self.__DEFAULT_LIFE_SPAN = 7
     self.__DEFAULT_PROBABILITY_DEATH_OTHER_CAUSES = 0.1
     super(Fox, self).__init__(self.__DEFAULT_LIFE_SPAN, self.__DEFAULT_PROBABILITY_DEATH_OTHER_CAUSES, Variability)
@@ -587,6 +644,9 @@ class Fox(Animal):
     self.__FoodUnitsConsumedThisPeriod  = 0
 
   def AdvanceGeneration(self, ShowDetail):
+    """
+    Advances foxes by, um, killing them (if they haven't eaten)
+    """
     if self.__FoodUnitsConsumedThisPeriod == 0:
       self._IsAlive = False
       if ShowDetail:
@@ -607,9 +667,24 @@ class Fox(Animal):
             print("  Fox has died of old age.")
 
   def ResetFoodConsumed(self):
+    """
+    (Re)Setter for self.__FoodUnitsConsumedThisPeriod
+    """
     self.__FoodUnitsConsumedThisPeriod = 0
 
   def ReproduceThisPeriod(self): 
+    """
+    Advises on whether Foxes should reproduce based on probability constant
+
+    Notes:
+      Could move the attribute to the Animal or Fox class as a parameter, so you could vary the reproduction rate?
+
+    Attributes:
+      REPRODUCTION_PROBABILITY (float): probability of love-making ;)
+
+    Returns:
+      bool: True if period should feature reproduction, otherwise False
+    """
     REPRODUCTION_PROBABILITY  = 0.25
     if random.randint(0, 100) < REPRODUCTION_PROBABILITY * 100:
       return True
@@ -617,20 +692,48 @@ class Fox(Animal):
       return False
 
   def GiveFood(self, FoodUnits):
+    """
+    Adds specified number of units to self.__FoodUnitsConsumedThis period, in effect "eating"
+
+    Args:
+      FoodUnits (int): Number of units to "consume"
+    """
     self.__FoodUnitsConsumedThisPeriod = self.__FoodUnitsConsumedThisPeriod + FoodUnits
   
   def Inspect(self):
+    """Overrides Animal.Inspect(), also printing the food the fox needs and how many units it has eaten"""
     super(Fox, self).Inspect()
     print("Food needed", self.__FoodUnitsNeeded, "", end = "")
     print("Food eaten", self.__FoodUnitsConsumedThisPeriod, "", end = "")
     print()
 
 class Genders(enum.Enum):
+  """
+  Only two genders?????????
+
+  Notes:
+    You may be asked to expand this to include more genders or add properties for genders?
+  Attributes:
+    Male (enum): Wow.
+    Female (enum): Seriously not funny, AQA
+  """
   Male = 1
   Female = 2
     
 class Rabbit(Animal):
   def __init__(self, Variability, ParentsReproductionRate = 1.2):
+    """
+    Rabbit is an Animal with some funky extras (but spoiler, they're weak AF)
+
+    Args:
+        Variability (int): Something to do with chance/randomness in Warrens
+        ParentsReproductionRate (float, optional): Reproduction rate of Rabbit's parents
+
+    Attributes:
+        __DEFAULT_LIFE_SPAN (int): Constant that sets lifespan
+        __DEFAULT_PROBABILITY_DEATH_OTHER_CAUSES (float): Constant for Animal's probability of death by other causes (non-fox)
+        __Gender (enum): Instance of Gender class
+    """
     self.__DEFAULT_LIFE_SPAN = 4
     self.__DEFAULT_PROBABILITY_DEATH_OTHER_CAUSES  = 0.05
     super(Rabbit, self).__init__(self.__DEFAULT_LIFE_SPAN, self.__DEFAULT_PROBABILITY_DEATH_OTHER_CAUSES, Variability)
@@ -641,6 +744,7 @@ class Rabbit(Animal):
       self.__Gender = Genders.Female
 
   def Inspect(self):
+    """Overrides Animal.Inspect(), also printing the food the reproduction rate and the gender of the rabbit"""
     super(Rabbit, self).Inspect()
     print("Rep rate", round(self.__ReproductionRate, 1), "", end = "")
     if self.__Gender == Genders.Female:
@@ -649,15 +753,33 @@ class Rabbit(Animal):
       print("Gender Male")
     
   def IsFemale(self):
+    """
+    Checks if self.__Gender is Female
+    
+    Returns:
+      bool: True if Rabbit is female, otherwise False
+    """
     if self.__Gender == Genders.Female:
       return True
     else:
       return False
     
-  def GetReproductionRate(self): 
+  def GetReproductionRate(self):
+    """Getter for self.__ReproductionRate""" 
     return self.__ReproductionRate
 
 def Main():
+  """
+  Starts simulation with defined (or inputted) settings
+
+  Attributes:
+    MenuOption (int): Choice, overriden by inputted Choice
+    LandscapeSize (int)
+    InitialWarrenCount (int)
+    InitialFoxCount (int)
+    Variability (int)
+    FixedInitialLocations (bool)
+  """
   MenuOption = 0
   while MenuOption != 3:
     print("Predator Prey Simulation Main Menu")
